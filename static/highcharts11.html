@@ -1,0 +1,207 @@
+<html>
+    <head>
+        <script type = "text/javascript">
+            
+            function Get_Two_Year(ticker, cur_time, two_years_ago) {
+                var Httpreq = new XMLHttpRequest();
+                var url = "https://myhw7-7777.wl.r.appspot.com/twoyearsprice/" + ticker + "/" + two_years_ago + "/" + cur_time;
+                Httpreq.open("GET",url,false);
+                Httpreq.send(null);
+                return Httpreq.responseText;
+            }
+            
+            
+
+            
+
+            function init_recommen(ticker) {
+                var json_obj = JSON.parse(Get_Recommen(ticker))
+                //console.log(json_obj);
+                let dates = [], strongbuydata = [], buydata = [], holddata = [], selldata = [], strongselldata = [];
+                let size = json_obj.length;
+                let colors = ['#176f37', '#1fb954', '#b88b1d', '#f45b5a', '#813131'];
+                for (var i = 0; i < size; i++) {
+                    dates.push(json_obj[i].period.slice(0,7));
+                    strongbuydata.push(json_obj[i].strongBuy);
+                    buydata.push(json_obj[i].buy);
+                    holddata.push(json_obj[i].hold);
+                    selldata.push(json_obj[i].sell);
+                    strongselldata.push(json_obj[i].strongSell);
+                }
+
+                Highcharts.chart('container', {
+                    colors: colors,
+                    chart: {type: 'column'},
+                    title: {text: 'Recommendation Trends'},
+                    xAxis: {categories: dates},
+                    yAxis: {min: 0,title: {text: '#Analysis', align: 'high'}},
+                    legend: {
+                        align: 'center',
+                        x: 0,
+                        verticalAlign: 'bottom',
+                        y: 5,
+                        floating: false,
+                        backgroundColor:
+                            Highcharts.defaultOptions.legend.backgroundColor || 'white',
+                        borderColor: '#CCC',
+                        borderWidth: 1,
+                        shadow: false
+                    },
+
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            dataLabels: {
+                                enabled: true
+                            }
+                        }
+                    },
+                    series: [{type: undefined, name: 'Strong Buy', data: strongbuydata}, 
+                            {type: undefined, name: 'Buy', data: buydata}, 
+                            {type: undefined, name: 'Hold', data: holddata}, 
+                            {type: undefined, name: 'Sell', data: selldata}, 
+                            {type: undefined, name: 'Strong Sell', data: strongselldata}
+                    ]
+
+
+                })
+            }
+
+            function init_six_hour(ticker) { 
+                var cur_time = Math.floor(Date.now() / 1000);
+                var six_hours_ago = cur_time - 360 * 60;
+                var json_obj = JSON.parse(Get_Six_Hour(ticker, cur_time, six_hours_ago));
+                console.log(json_obj);
+                
+                let TimeVSPrice = [];
+                    
+                for (var i = 0 ; i < json_obj["c"].length; i++) {
+                    TimeVSPrice.push([(json_obj.t[i] * 1000) - (7 * 60 * 60 * 1000), json_obj.c[i]]);
+                }
+                console.log(TimeVSPrice)
+
+                Highcharts.stockChart('container', {
+                    series: [
+                            {
+                            data: TimeVSPrice,
+                            color: "grey",
+                            name: ticker.toUpperCase(),
+                            type: 'line',
+                            tooltip: {valueDecimals: 2,},
+                            },
+                    ],
+                    title: { text: ticker.toUpperCase() + ' hourly price variation' },
+                    navigator: {enabled: false},
+                    rangeSelector: {enabled: false,},
+                })
+               
+            }
+
+            function init_two_year(ticker) {
+                let today = new Date();
+                let this_year = today.getFullYear();
+                let this_month = today.getMonth();
+                let this_day = today.getDate();
+                let twoyearsago = new Date(this_year - 2, this_month, this_day);
+                let today_str = Date.parse(today.toISOString().slice(0,10)).toString().slice(0,10);
+                let twoyears_str = Date.parse(twoyearsago.toISOString().slice(0,10)).toString().slice(0,10);
+                
+                var json_obj = JSON.parse(Get_Two_Year(ticker, today_str, twoyears_str));
+                console.log(json_obj)
+
+                let TimeVSohlc = [];
+                let TimeVSVolume = [];
+                let size = json_obj["c"].length;
+                for (var i = 0; i < size; i++) {
+                    TimeVSohlc.push([json_obj.t[i] * 1000, json_obj.o[i],
+                    json_obj.h[i], json_obj.l[i], json_obj.c[i]]);
+                    TimeVSVolume.push([json_obj.t[i] * 1000, json_obj.v[i]]);
+                }
+
+                Highcharts.stockChart('container', {
+                    rangeSelector: {
+                        buttons: [
+                        {type: 'month', count: 1, text: '1m',},
+                        {type: 'month', count: 3, text: '3m',},
+                        {type: 'month', count: 6, text: '6m',},
+                        {type: 'ytd', text: 'YTD',},
+                        {type: 'year', count: 1, text: '1y',},
+                        {type: 'all', text: 'All',},
+                        ],
+                        selected: 2,
+                    },
+
+                    title: {text: ticker.toUpperCase() + ' Historical' },
+                    subtitle: {text: 'With SMA and Volume by Price technical indicators',},
+
+                    yAxis: [
+                        {startOnTick: false, endOnTick: false,
+                        labels: {align: 'right',x: -3,},
+                        title: {text: 'OHLC',},
+                        height: '60%',
+                        lineWidth: 2,
+                        resize: {enabled: true,},
+                        },
+                        { labels: {align: 'right',x: -3,},
+                        title: {text: 'Volume',},
+                        top: '65%',
+                        height: '35%',
+                        offset: 0,
+                        lineWidth: 2,
+                        },
+                    ],
+
+                    tooltip: {split: true,},
+
+                    series: [
+                        {
+                        type: 'candlestick',
+                        name: ticker.toUpperCase(),
+                        id: ticker,
+                        zIndex: 2,
+                        data: TimeVSohlc,
+                        },
+                        {
+                        type: 'column',
+                        name: 'Volume',
+                        id: 'volume',
+                        data: TimeVSVolume,
+                        yAxis: 1,
+                        },
+                        {
+                        type: 'vbp',
+                        linkedTo: ticker,
+                        params: {volumeSeriesID: 'volume',},
+                        dataLabels: {enabled: false,},
+                        zoneLines: {enabled: false,},
+                        },
+                        {
+                        type: 'sma',
+                        linkedTo: ticker,
+                        zIndex: 1,
+                        marker: {enabled: false,},
+                        },
+                    ],
+                    
+                })
+            }
+
+
+        </script>
+            
+    </head>
+
+    <body>
+        
+
+        
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+        <script src="https://code.highcharts.com/stock/indicators/indicators.js"></script>
+        <script src="https://code.highcharts.com/stock/indicators/volume-by-price.js"></script>
+        <div id="container"></div>
+        
+    </body>
+</html>

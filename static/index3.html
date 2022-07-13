@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="static/page3.css">
+    <title>Document</title>
+
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+    
+    <script type="text/javascript">
+        
+
+            var order = 0
+            function orderopration(){
+                if (order == 2){
+                    //document.getElementById("output1").innerHTML=order
+                    document.getElementById("stockcompany").click()
+                }else if(order == 3){
+                    //document.getElementById("output1").innerHTML=order
+                    document.getElementById("charts").click()
+                }else if(order == 4){
+                    //document.getElementById("output1").innerHTML=order
+                    document.getElementById("latestnews").click()
+                }else{
+                    //document.getElementById("output1").innerHTML=order
+                    document.getElementById("company").click()
+                }
+            }
+            
+            var name="";
+            function disappear(){
+                order = 0
+                document.getElementById("company").style.backgroundColor = "rgb(173, 171, 171)";
+                document.getElementById("stockcompany").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("charts").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("latestnews").style.backgroundColor = "rgb(239, 239, 239)"
+                document.getElementById("table1").style.display = "none";
+                document.getElementById("table23").style.display = "none";
+                document.getElementById("block4").style.display = "none";
+                document.getElementById("container").style.display = "none";
+                document.getElementById("navbar").style.display = "none";
+                document.getElementById("error").style.display = "none";
+            }
+
+            function myCode(event) {
+                //document.getElementById("whole").style.display = "block";
+                var content = document.getElementById("Code").value
+                //document.getElementById("output1").innerHTML = content
+                if (content == ""){
+                    var i = 0 //execute anything 
+                }else{
+                symbol = document.getElementById("input")
+                var req = new XMLHttpRequest();
+                //construct a key/value pair based on the form ID
+                var FD = new FormData(symbol);
+
+                req.onreadystatechange = function() {
+                    if (req.readyState == 4 && req.status == 200) {
+                        var response = JSON.parse(req.responseText)
+                        name = response['ticker']  
+                        if (name != "undefined"){
+                        document.getElementById("line0").innerHTML = "<img "+ 'width="120"'+"src= "+response['logo']+" alt=''>"                                     
+                        document.getElementById("line1").innerHTML = response['name']
+                        document.getElementById("line2").innerHTML = response['ticker']
+                        document.getElementById("line3").innerHTML = response['exchange']
+                        document.getElementById("line4").innerHTML = response['ipo']
+                        document.getElementById("line5").innerHTML = response['finnhubIndustry']
+                        /*
+                        document.getElementById("table1").style.display = "table";
+                        document.getElementById("navbar").style.display = "block";
+                        document.getElementById("table23").style.display = "none";
+                        document.getElementById("block4").style.display = "none";
+                        document.getElementById("container").style.display = "none";
+                        document.getElementById("company").style.backgroundColor = "rgb(173, 171, 171)";
+                        document.getElementById("stockcompany").style.backgroundColor = "rgb(239, 239, 239)";
+                        document.getElementById("charts").style.backgroundColor = "rgb(239, 239, 239)";
+                        document.getElementById("latestnews").style.backgroundColor = "rgb(239, 239, 239)"
+                        document.getElementById("error").style.display = "none"*/
+                        }
+                        else{
+                            //document.getElementById("error").style.display = "block";
+                            document.getElementById("navbar").style.display = "none";
+                            document.getElementById("table1").style.display = "none";
+                            document.getElementById("table23").style.display = "none";
+                            document.getElementById("container").style.display = "none";
+                            document.getElementById("block4").style.display = "none";
+                            document.getElementById("error").style.display = "block";
+                        }
+                        
+                    }    
+                }}
+                var param = new URLSearchParams(FD);
+                req.open("GET", "/process?" + param, true);
+                req.send(null);
+                event.preventDefault();            
+            }
+            
+
+
+            function myCode2(event) {
+                var req = new XMLHttpRequest();
+                var FD = new FormData(document.getElementById("input"));
+            
+                req.onreadystatechange = function() {
+                    if (req.readyState == 4 && req.status == 200) {
+                        var response = JSON.parse(req.responseText)
+                        //name = response['name']
+                        document.getElementById("line11").innerHTML = response['symbol']
+                        document.getElementById("line21").innerHTML = response['t']
+                        document.getElementById("line31").innerHTML = response['pc']
+                        document.getElementById("line41").innerHTML = response['o']
+                        document.getElementById("line51").innerHTML = response['h']
+                        document.getElementById("line61").innerHTML = response['l']
+                        if(response['d'] < 0){
+                            document.getElementById("line71").innerHTML = response['d']+"<img src='static/RedArrowDown.png'"+ 'width="12"'+">"
+                        }else if(response['d'] > 0){
+                            document.getElementById("line71").innerHTML = response['d']+"<img src='static/GreenArrowUp.png'"+ 'width="12"'+">"
+                        }
+                        if(response['dp'] < 0){
+                            document.getElementById("line81").innerHTML = response['dp']+"<img src='static/RedArrowDown.png'"+ 'width="12"'+">"
+                        }else if(response['dp'] > 0){
+                            document.getElementById("line81").innerHTML = response['dp']+"<img src='static/GreenArrowUp.png'"+ 'width="12"'+">"
+                        }else{
+                            document.getElementById("line81").innerHTML = response['dp']
+                        }
+                        document.getElementById("b2").innerHTML = response['strongSell']
+                        document.getElementById("b3").innerHTML = response['buy']
+                        document.getElementById("b4").innerHTML = response['hold']
+                        document.getElementById("b5").innerHTML = response['sell']
+                        document.getElementById("b6").innerHTML = response['strongBuy']
+                    }
+                    
+                }
+                var param = new URLSearchParams(FD);
+                req.open("GET", "/process1?" + param, true);
+                req.send(null);
+                event.preventDefault(); 
+               
+            }
+
+            
+            function highcharts(){
+                Highcharts.getJSON('/process2', function (data) {
+                var tc=[];
+                var tv=[];
+                datalength = data.length;
+                for (i=0; i< datalength; i += 1){
+                tc.push([data[i][0],data[i][1]]);
+                tv.push([data[i][0],data[i][2]]);
+                }
+                
+                const d = new Date()
+                d.setMonth(d.getMonth()-6)
+                dd = d.getMonth()+1
+                if (dd<10){ dd = "0" + dd}
+                datetime11 = d.getFullYear() +"-"+ dd+"-"+d.getDate()
+            // Create the chart
+                Highcharts.stockChart('container', {
+                plotOptions: {
+                series: {
+                pointWidth: 5
+                }}, 
+
+                rangeSelector: {
+                    selected: 0,
+                    inputEnabled:false,
+                    buttons:[{
+                        type: 'day',
+                        count: 7,
+                        text: '7d',
+                    }, {
+                        type: 'day',
+                        count: 15,
+                        text: '15d',
+                    }, {
+                        type: 'month',
+                        count: 1,
+                        text: '1m',
+                    }, {
+                        type: 'month',
+                        count: 3,
+                        text: '3m',
+                    }, {
+                        type: 'month',
+                        count: 6,
+                        text: '6m',
+                    }]
+                },
+
+                title: {
+                    text: 'Stock Price ' + name + ' '+ datetime11
+                },
+
+                subtitle:{text: '<a id="link101"  class = "linkforhighcharts" style="color: blue; text-decoration:underline;cursor:pointer;" href="https://finnhub.io/" target="_blank">Source: Finnhub</a>'},
+
+                yAxis: [{
+                    opposite:false,
+                    labels: {
+                        align: 'right',
+                        x: -3
+                    },
+                    title: {
+                        text: 'Stock Price'
+                    },
+                    height: '100%',
+                    lineWidth: 2,
+                    resize: {
+                        enabled: true
+                    }
+                }, {
+                    labels: {
+                        align: 'right',
+                        x: 0
+                    },
+                    title: {
+                        text: 'Volume'
+                    },
+                    height: '100%',
+                    offset: 0,
+                    lineWidth: 2
+                }],
+
+
+            series: [{
+                name: name+' Stock Price',
+                data: tc,
+                type: 'area',
+                threshold: null,
+                tooltip: {
+                    valueDecimals: 2
+                },
+                fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                }
+            }, {
+                    type: 'column',
+                    color: '#808080',
+                    name: 'Volume',
+                    data: tv,
+                    yAxis: 1
+                }]
+            });
+            });
+            }
+
+            var response4 = {}
+            function myCode4(event) {
+                symbol = document.getElementById("input")
+                var req = new XMLHttpRequest();
+                var FD = new FormData(symbol);
+
+                req.onreadystatechange = function() {
+                    if (req.readyState == 4 && req.status == 200) {
+                        response4 = JSON.parse(req.responseText)
+                        //document.getElementById("output").innerHTML = response4[1]['category']
+                        size1 = Object.keys(response4).length 
+                        var i = 0
+                        for(i; i< size1; i ++) {
+                            var strid = i.toString()
+                            var text = "<table id='table41' class = 'table4'>"
+                            text += "<tr><td id='table411' rowspan='5' class = 'firstb' style='background-image:url("+response4[i]['image']+");'></td></tr>"
+                            text += "<tr><td id = 'table412' class='linefour1'>"+response4[i]['headline']+"</td></tr>"
+                            text += "<tr><td id = 'table413' class='linefour'>"+response4[i]['datetime']+"</td></tr>"
+                            text += "<tr><td id = 'table414' class='linefour'>"+"<a href="+response4[i]['url']+" target='_blank' >See Original Post </a>"+"</td></tr>"
+                            text += "<tr><td class='linefour'></td></tr></table>"
+                            document.getElementById(strid).innerHTML = text
+                        }
+                    
+                    }   
+                }
+                var param = new URLSearchParams(FD);
+                req.open("GET", "/process3?" + param, true);
+                req.send(null);
+                event.preventDefault();
+            }
+
+            
+            function searchclick(){
+                document.getElementById("navbar").style.display = "block";
+                document.getElementById("table1").style.display = "table";
+                document.getElementById("table23").style.display = "none";
+                document.getElementById("block4").style.display = "none";
+                document.getElementById("container").style.display = "none";
+                document.getElementById("company").style.backgroundColor = "rgb(173, 171, 171)";
+                document.getElementById("stockcompany").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("charts").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("latestnews").style.backgroundColor = "rgb(239, 239, 239)"
+                document.getElementById("error").style.display = "none"
+            }
+            
+
+            function companyclick(){
+                order = 1
+                document.getElementById("table1").style.display = "table";
+                document.getElementById("table23").style.display = "none";
+                document.getElementById("block4").style.display = "none";
+                document.getElementById("container").style.display = "none";
+                document.getElementById("company").style.backgroundColor = "rgb(173, 171, 171)";
+                document.getElementById("stockcompany").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("charts").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("latestnews").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("error").style.display = "none";
+                
+            }
+            function stockcompanyclick(){
+                order = 2
+                document.getElementById("table1").style.display = "none";
+                document.getElementById("table23").style.display = "block";
+                document.getElementById("block4").style.display = "none";
+                document.getElementById("container").style.display = "none";
+                document.getElementById("stockcompany").style.backgroundColor = "rgb(173, 171, 171)";
+                document.getElementById("company").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("charts").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("latestnews").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("error").style.display = "none";
+                
+            }
+            
+            function chartsclick(){
+                order = 3
+                document.getElementById("table1").style.display = "none";
+                document.getElementById("table23").style.display = "none";
+                document.getElementById("block4").style.display = "none";
+                document.getElementById("container").style.display = "block";
+                document.getElementById("stockcompany").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("company").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("charts").style.backgroundColor = "rgb(173, 171, 171)";
+                document.getElementById("latestnews").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("error").style.display = "none";
+            }
+            
+
+            function latestnewsclick(){
+                order = 4
+                document.getElementById("table1").style.display = "none";
+                document.getElementById("table23").style.display = "none";
+                document.getElementById("container").style.display = "none";
+                document.getElementById("block4").style.display = "block";
+                document.getElementById("stockcompany").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("company").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("charts").style.backgroundColor = "rgb(239, 239, 239)";
+                document.getElementById("latestnews").style.backgroundColor = "rgb(173, 171, 171)";
+                document.getElementById("error").style.display = "none";
+            }
+
+            function linkincharts(){
+                document.getElementById("link101").style.color = "rgb(148,0,211)"
+            }
+
+    </script>
+</head>
+<body style ='width:1300px' >
+    <div class = 'bg'>
+        <h1 class='head'>Stock Search</h1>
+        <form id='input'  action = '/process' method="get" >
+        <div class = 'input-wrapper'>
+            <input type="image" src="static/search-solid.svg" alt="search" id='glass' class='search' onclick="myCode(event);searchclick();orderopration();">
+            <input  type="text" placeholder = 'Enter Stock Ticker Symbol' id = 'Code' name = 'code' class='box' required>
+            <div class ='line'></div>
+            <input type="reset" id='resetbutton' style="display: none;cursor:pointer">
+            <img onclick="document.getElementById('resetbutton').click();disappear()"
+                src="static/times-solid.svg" style="height: 20px; margin-left: 10px; cursor:pointer" id = 'pic' class = 'image112' >
+        </div>
+        </form>
+    
+    <div id = 'whole'>
+    <div id = 'navbar' style="padding-top: 80px; display: none;">
+        <ul>
+        <button id = company onclick="companyclick();myCode(event)" style="background-color: rgb(173, 171, 171);">Company</button>
+        <button id = stockcompany onclick="stockcompanyclick();myCode2(event)">Stock Summary</button>
+        <button id = charts onclick="chartsclick();highcharts()">Charts</button>
+        <button id = latestnews onclick="latestnewsclick();myCode4(event)">Latest News</button>
+        </ul> 
+        
+    </div>
+
+
+    
+    
+    <table id = table1 class = "table1" style="border-spacing:0px; border-collapse: collapse;margin: auto;margin-top: 50px; display: none;">
+        <tr class = 'tablerow'>
+            <th colspan="2" id = line0></th>
+            
+        </tr>
+        <tr>
+            <th class = 'tableline' >Campany Name&nbsp</th>
+            <th class = 'tableline1' id = line1></th>
+        </tr>
+        <tr>
+            <th class = 'tableline'>Stock Ticker Symbol&nbsp</th>
+            <th class = 'tableline1' id = line2></th>
+        </tr>
+        <tr>
+            <th class = 'tableline'>Stock Exchange Code&nbsp</th>
+            <th class = 'tableline1' id = line3> </th>
+        </tr>
+        <tr>
+            <th class = 'tableline'>Company IPO Date&nbsp</th>
+            <th class = 'tableline1' id = line4> </th>
+        </tr>
+        <tr>
+            <th class = 'tableline'>Category&nbsp</th>
+            <th class = 'tableline1' id = line5> </th>
+        </tr>
+        
+    </table>
+    
+
+    <div id = table23 style="display: none; margin-top: 50px;">
+    <table id = table2 class = 'table1' style="border-spacing:0px; border-collapse: collapse; " >
+        <tr>
+            <th class = 'tableline2' >Stock Ticker Symbol&nbsp</th>
+            <th class = 'tableline3' id = line11></th>
+        </tr>
+        <tr>
+            <th class = 'tableline2'>Trading Day&nbsp</th>
+            <th class = 'tableline3' id = line21></th>
+        </tr>
+        <tr>
+            <th class = 'tableline2'>Previous Closing Price&nbsp</th>
+            <th class = 'tableline3' id = line31></th>
+        </tr>
+        <tr>
+            <th class = 'tableline2'>Opening Price&nbsp</th>
+            <th class = 'tableline3' id = line41></th>
+        </tr>
+        <tr>
+            <th class = 'tableline2'>High Price&nbsp</th>
+            <th class = 'tableline3' id = line51></th>
+        </tr>
+        <tr>
+            <th class = 'tableline2'>Low Price&nbsp</th>
+            <th class = 'tableline3' id = line61> </th>
+        </tr>
+        <tr>
+            <th class = 'tableline2'>Change&nbsp</th>
+            <th class = 'tableline3' id = line71> </th>
+        </tr>
+        <tr>
+            <th class = 'tableline2'>Change Percent&nbsp</th>
+            <th class = 'tableline3' id = line81> </th>
+        </tr>
+    </table>
+
+    <table id=table3 class = 'table3'>
+        <tr>
+            <th class = 'b1'>Strong Sell</th>
+            <th class = 'b2' id=b2></th>
+            <th class = 'b3' id=b3></th>
+            <th class = 'b4' id=b4></th>
+            <th class = 'b5' id=b5></th>
+            <th class = 'b6' id=b6></th>
+            <th class = 'b7'>Strong Buy</th>
+        </tr>  
+        <tr>
+            <th class = 'rt' colspan="7">Recommendation Trends</th>
+            <th>&nbsp</th>
+            <th>&nbsp</th>
+            <th>&nbsp</th>
+            <th>&nbsp</th>
+            <th>&nbsp</th>
+            <th>&nbsp</th>
+        </tr>     
+    </table>
+    </div> 
+    <!--
+           <div id="output" style="width: 200px; height: 75px;border: 1px solid;"></div> 
+    -->
+    <div id="container"></div>  
+
+    <div id = 'block4'>
+        <div id = "0"></div>
+    <div id = "1"></div>
+    <div id = "2"></div>
+    <div id = "3"></div>
+    <div id = "4"></div>
+    </div>    
+</div>    
+<div id="error" style="display: none;" class = "error1">Error: No record has been found, please enter a valid symbol</div>  
+<!--
+  <div id="output1" style="width: 200px; height: 75px;border: 1px solid;margin-left: 200px;"></div>   
+-->
+  
+
+   
+    
+    
+
+
+    
+</body>
+
+
+
+</html>
+</html>
+
